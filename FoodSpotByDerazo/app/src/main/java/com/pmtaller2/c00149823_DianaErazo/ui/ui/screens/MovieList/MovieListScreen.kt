@@ -1,0 +1,75 @@
+package com.agarcia.myfirstandroidapp.ui.screens.MovieList
+
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.agarcia.myfirstandroidapp.ui.components.MovieItem
+
+@Composable
+fun MovieListScreen(
+  onMovieClick: (Int) -> Unit = {},
+  viewModel: MovieListViewModel = viewModel()
+) {
+  val movies by viewModel.movies.collectAsState()
+  val loading by viewModel.loading.collectAsState()
+
+  LaunchedEffect(Unit) {
+    viewModel.loadMovies()
+  }
+
+  if (loading) {
+    CircularProgressIndicator()
+    return
+  }
+
+  val groupedMovies = movies.groupBy { it.category }
+
+  LazyColumn(
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(16.dp)
+  ) {
+    groupedMovies.forEach { (category, restaurantsInCategory) ->
+      item {
+        Text(
+          text = category,
+          style = MaterialTheme.typography.titleLarge,
+          modifier = Modifier.padding(vertical = 8.dp)
+        )
+      }
+
+      items(restaurantsInCategory) { restaurant ->
+        MovieItem(
+          restaurant = restaurant,
+          onMovieClick = onMovieClick
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+      }
+
+      item {
+        Spacer(modifier = Modifier.height(24.dp))
+      }
+    }
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MovieListScreenPreview() {
+  MovieListScreen()
+}
